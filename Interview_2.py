@@ -1,6 +1,6 @@
-ï»¿#################################################
+#################################################
 # Interview_2.py
-#é¡Œç›®:çµ¦å®šwikié é¢ï¼Œæ‰¾å‡ºé é¢ä¸­æ‰€æœ‰çš„äººåä»¥åŠå‡ºç¾é »çŽ‡
+#ÃD¥Ø:µ¹©wwiki­¶­±¡A§ä¥X­¶­±¤¤©Ò¦³ªº¤H¦W¥H¤Î¥X²{ÀW²v
 #
 # 2016 Chi-Lun Huang
 #################################################
@@ -13,12 +13,12 @@ import jieba.posseg as pseg
 from operator import itemgetter #sort
 
 # To get web content
-res = requests.get("https://zh.wikipedia.org/wiki/%E5%8F%B0%E7%81%A3%E7%A9%8D%E9%AB%94%E9%9B%BB%E8%B7%AF%E8%A3%BD%E9%80%A0%E5%85%AC%E5%8F%B8")
+res = requests.get(str(input("Please enter your url: ")))
 soup = bs(res.text.encode('utf8'),'html.parser')
-
-
+#initialize
+jieba.initialize()
 # Add traditional chinese dictionary in jieba
-jieba.set_dictionary('dict.txt.big.txt')
+#jieba.set_dictionary('dict.txt.big.txt')
 # Add dictionary some words to recognize some words which recognize error in jieba
 jieba.load_userdict("userdict.txt")
 
@@ -31,7 +31,7 @@ def jiebaProcess(words) :
             seg = words[i].text
             if len(seg) > 0 :
                 #print(seg) #Original file 
-                seg_paragraph = seg.split('ã€‚')
+                seg_paragraph = seg.split('¡C')
                 # read seg_paragraph
                 for j in range(0,len(seg_paragraph)) :
                     #print(seg_paragraph[j]) # Original seg_paragraph
@@ -40,6 +40,7 @@ def jiebaProcess(words) :
                         # Use jiebia to get POS 
                         segmented_result = pseg.cut(str(seg_paragraph[j]))
                         for pos in segmented_result:
+                            #print (pos.word, pos.flag)
                             # Add result into dic        
                             if pos.word not in dic and pos.flag =='nr' and len(pos.word)>1:
                                 dic[pos.word] = 1
@@ -50,8 +51,8 @@ def jiebaProcess(words) :
 
                                                                                                 
 # Basic information
-for vcard in soup.select('.vcard'):
-    td = vcard.select('td')
+for infobox in soup.select('.infobox'):
+    td = infobox.select('td')
     jiebaProcess(td)
        
 
@@ -61,11 +62,17 @@ for div in soup.select(".mw-content-ltr"):
     jiebaProcess(p)
     
 # Refrerence
-for div in soup.select(".references-small"):
+for div in soup.select(".references"):
     referenceText = div.select(".reference-text")
     jiebaProcess(referenceText)   
-    
+
+# wikitable
+for div in soup.select(".wikitable"):
+    tableText = div.select("td")
+    jiebaProcess(tableText)    
 
 #Result
 swd = sorted(dic.items(), key=itemgetter(1), reverse=True)
 print (swd)
+
+#D:\Anaconda3\Lib\site-packages\jieba
